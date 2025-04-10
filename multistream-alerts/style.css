@@ -2,7 +2,8 @@
 	margin: 0;
 	padding: 0;
 	--margin: 40px;
-	--border-radius: 20px;
+	/* --border-radius: 20px; */
+	font-size: 30px;
 	/* --line-spacing: 1.7em; */
 }
 
@@ -15,7 +16,6 @@ html {
 	height: 100vh;
 	scroll-behavior: smooth;
 	/* background: #000000d9; */
-	font-size: 30px;
 	font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
 	color: white;
 	text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
@@ -37,155 +37,74 @@ html {
 }
 
 #mainContainer {
-	position: absolute;
-	height: calc(100% - 2 * var(--margin));
-	width: calc(100% - 2 * var(--margin));
-	margin: var(--margin);
-}
-
-#messageList {
-	position: absolute;
-	left: 0;
-	width: 100%;
-}
-
-.normalScrollDirection {
-	bottom: 0;
-}
-.reverseScrollDirection {
-	display: flex;
-	top: 0;
-	flex-direction: column-reverse;
-}
-
-li {
-	list-style: none;
-	overflow: hidden;
-	max-height: 0;
-	margin: 10px 0px 0px 0px;
-	transition: all 1s ease-in-out;
-}
-
-.reverseLineItemDirection {
-	display: flex;
-	flex-direction: column;
-	justify-content: flex-end;
-}
-
-.slide-fade li {
-	transition: all 0.5s ease-out;
-	opacity: 0;
-}
-
-.slide-fade li.show {
-	opacity: 1;
-}
-
-#IPutThisHereSoICanCalculateHowBigEachMessageIsSupposedToBeBeforeIAddItToTheMessageList {
-	opacity: 0;
-}
-
-#firstMessage,
-#sharedChat {
-	display: none;
-	font-weight: 500;
-	font-size: 0.7em;
-}
-
-.highlightMessage {
-	background: #adadad46;
-	padding: 20px 40px;
-	border-radius: var(--border-radius);
-}
-
-.avatar {
-	height: 2em;
-	margin: 1px;
-	transform: translate(0px, 0.25em);
-	border-radius: 50%
-}
-
-.timestamp,
-.pronouns {
-	background: #adadad46;
-	/* border-radius: var(--border-radius); */
-	border-radius: 1em;
-	font-size: 0.7em;
-	/* padding: 5px 15px; */
-	padding: 0.15em 0.5em;
-}
-
-.bits {
-	background: #adadad46;
-	border-radius: calc(var(--border-radius) / 2);
-	font-size: 0.7em;
-	padding: 5px 10px;
-}
-
-.platform,
-.badge,
-.emote {
-	height: 1em;
-	margin: 1px;
-	transform: translate(0px, 0.25em);
-}
-
-.productImage {
-	height: 15em;
-	border-radius: 0.25em;
-	transform: translate(0px, 0.25em);
-}
-
-.centerThatShitHomie {
-	display: inline-block;
-	width: 100%;
-	text-align: center;
-}
-
-#badgeList {
-	margin: 0px 5px;
-}
-
-#username,
-#title {
-	font-weight: 700;
-}
-
-.title {
-	font-weight: 700;
-}
-
-#reply {
-	display: none;
-	overflow: hidden;
-	white-space: nowrap;
-	text-overflow: ellipsis;
-	font-size: 0.7em;
-	opacity: 0.5;
-}
-
-#message {
-	font-weight: 400;
-	line-height: var(--line-spacing);
-}
-
-#card {
-	background: #adadad46;
-	padding: 20px 40px;
-	border-radius: var(--border-radius);
-}
-
-#youtubeSuperSticker {
 	display: block;
+	position: absolute;
+	width: 100%;
+	padding: var(--margin);
+	box-sizing: border-box;
 }
 
-#sticker-img {
-	height: 5em;
+#alertBox {
+	display: flex;
+	padding: 0.5em;
+	border-radius: 0.75em;
+	filter: drop-shadow(15px 15px 7px rgba(0, 0, 0, 1));
+	position: relative;
+	align-items: center;
+	overflow: hidden;
+	/* text-align: center; */
 }
 
-#stickerLabel {
-	text-align: center;
-	font-weight: 700;
+/* #alertBox::before {
+	content: "";
+	position: absolute;
+	top: -50px;
+	right: -50px;
+	bottom: -50px;
+	left: -50px;
+	background-image: url('https://static-cdn.jtvnw.net/jtv_user_pictures/272e643e-4d43-415f-9ee1-18916e825411-profile_image-300x300.png');
+	background-color: rgba(0, 0, 0, 0.6);
+	background-size: cover;
+	background-position: center;
+	background-blend-mode: multiply;	
+	filter: blur(25px);
+	z-index: -1;
+} */
+
+#avatar {
+	display: inline;
+	max-width: 100%;
+	height: 4em;
+	filter: drop-shadow(0px 0px 7px rgba(0, 0, 0, 0.5));
+	object-fit: cover;
+	margin-right: 0.75em;
+}
+
+#contents {
+	flex-grow: 1;
+}
+
+#username {
+	font-size: 1.2em;
+	font-weight: 600;
+}
+
+#description {
+	font-size: 1em;
+	font-weight: 400;
+}
+
+#attribute {
+	font-size: 0.8em;
+	font-weight: 400;
+}
+
+.profilePic {	
+	border-radius: 50%;
+}
+
+.square {	
+	border-radius: 0.5em;
 }
 
 /*****************/
@@ -242,6 +161,10 @@ li {
 
 .blank {
 	background: #adadad00 !important;
+}
+
+.highlightMessage {
+	background: #adadad46;
 }
 
 /****************/

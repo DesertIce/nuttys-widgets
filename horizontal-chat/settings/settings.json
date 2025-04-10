@@ -160,6 +160,14 @@
 			"group": "Which Twitch messages do you want to see?"
 		},
 		{
+			"id": "showTwitchSharedChat",
+			"label": "Shared Chat Messages",
+			"description": "",
+			"type": "checkbox",
+			"defaultValue": true,
+			"group": "Which Twitch messages do you want to see?"
+		},
+		{
 			"id": "showYouTubeMessages",
 			"label": "Chat Messages",
 			"description": "",
@@ -194,7 +202,7 @@
 		{
 			"id": "showStreamlabsDonations",
 			"label": "Streamlabs Tips",
-			"description": "",
+			"description": "<a href=\"https://docs.streamer.bot/guide/integrations/streamlabs\" target=\"_blank\">Click to connect</a>",
 			"type": "checkbox",
 			"defaultValue": true,
 			"group": "Which donation messages do you want to see?"
@@ -202,7 +210,7 @@
 		{
 			"id": "showStreamElementsTips",
 			"label": "StreamElements Tips",
-			"description": "",
+			"description": "<a href=\"https://docs.streamer.bot/guide/integrations/streamelements\" target=\"_blank\">Click to connect</a>",
 			"type": "checkbox",
 			"defaultValue": true,
 			"group": "Which donation messages do you want to see?"
@@ -210,7 +218,7 @@
 		{
 			"id": "showPatreonMemberships",
 			"label": "Patreon Memberships",
-			"description": "",
+			"description": "<a href=\"https://docs.streamer.bot/guide/integrations/patreon\" target=\"_blank\">Click to connect</a>",
 			"type": "checkbox",
 			"defaultValue": true,
 			"group": "Which donation messages do you want to see?"
@@ -218,7 +226,7 @@
 		{
 			"id": "showKofiDonations",
 			"label": "Ko-fi Donations",
-			"description": "",
+			"description": "<a href=\"https://docs.streamer.bot/guide/integrations/ko-fi\" target=\"_blank\">Click to connect</a>",
 			"type": "checkbox",
 			"defaultValue": true,
 			"group": "Which donation messages do you want to see?"
@@ -226,7 +234,7 @@
 		{
 			"id": "showTipeeeStreamDonations",
 			"label": "TipeeeStream Donations",
-			"description": "",
+			"description": "<a href=\"https://docs.streamer.bot/guide/integrations/tipeee-stream\" target=\"_blank\">Click to connect</a>",
 			"type": "checkbox",
 			"defaultValue": true,
 			"group": "Which donation messages do you want to see?"
@@ -234,10 +242,18 @@
 		{
 			"id": "showFourthwallAlerts",
 			"label": "Fourthwall Alerts",
-			"description": "",
+			"description": "<a href=\"https://docs.streamer.bot/guide/integrations/fourthwall\" target=\"_blank\">Click to connect</a>",
 			"type": "checkbox",
 			"defaultValue": true,
 			"group": "Which donation messages do you want to see?"
+		},
+		{
+			"id": "furryMode",
+			"label": "Furry Mode",
+			"description": "Meow",
+			"type": "checkbox",
+			"defaultValue": false,
+			"group": "Very Important Stuff"
 		},
 		{
 			"id": "address",

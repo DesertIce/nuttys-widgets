@@ -8,6 +8,7 @@ const urlParams = new URLSearchParams(queryString);
 const sbServerAddress = urlParams.get("address") || "127.0.0.1";
 const sbServerPort = urlParams.get("port") || "8080";
 const avatarMap = new Map();
+const pronounMap = new Map();
 
 /////////////
 // OPTIONS //
@@ -26,17 +27,19 @@ const lineSpacing = urlParams.get("lineSpacing") || "1.7";
 const background = urlParams.get("background") || "#000000";
 const opacity = urlParams.get("opacity") || "0.85";
 
-const hideAfter = GetIntParam("hideAfter") || 0;
+const hideAfter = GetIntParam("hideAfter", 0);
 const excludeCommands = GetBooleanParam("excludeCommands", true);
 const ignoreChatters = urlParams.get("ignoreChatters") || "";
-const scrollDirection = GetIntParam("scrollDirection") || 1;
-const imageEmbedPermissionLevel = GetIntParam("imageEmbedPermissionLevel") || 20;
+const scrollDirection = GetIntParam("scrollDirection", 1);
+const inlineChat = GetBooleanParam("inlineChat", false);
+const imageEmbedPermissionLevel = GetIntParam("imageEmbedPermissionLevel", 20);
 
 const showTwitchMessages = GetBooleanParam("showTwitchMessages", true);
 const showTwitchAnnouncements = GetBooleanParam("showTwitchAnnouncements", true);
 const showTwitchSubs = GetBooleanParam("showTwitchSubs", true);
 const showTwitchChannelPointRedemptions = GetBooleanParam("showTwitchChannelPointRedemptions", true);
 const showTwitchRaids = GetBooleanParam("showTwitchRaids", true);
+const showTwitchSharedChat = GetIntParam("showTwitchSharedChat", 2);
 
 const showYouTubeMessages = GetBooleanParam("showYouTubeMessages", true);
 const showYouTubeSuperChats = GetBooleanParam("showYouTubeSuperChats", true);
@@ -49,6 +52,8 @@ const showPatreonMemberships = GetBooleanParam("showPatreonMemberships", true);
 const showKofiDonations = GetBooleanParam("showKofiDonations", true);
 const showTipeeeStreamDonations = GetBooleanParam("showTipeeeStreamDonations", true);
 const showFourthwallAlerts = GetBooleanParam("showFourthwallAlerts", true);
+
+const furryMode = GetBooleanParam("furryMode", false);
 
 // Set fonts for the widget
 document.body.style.fontFamily = font;
@@ -69,8 +74,7 @@ document.body.style.background = `${background}${hexOpacity}`;
 const ignoreUserList = ignoreChatters.split(',').map(item => item.trim().toLowerCase()) || [];
 
 // Set the scroll direction
-switch (scrollDirection)
-{
+switch (scrollDirection) {
 	case 1:
 		document.getElementById('messageList').classList.add('normalScrollDirection');
 		break;
@@ -78,7 +82,7 @@ switch (scrollDirection)
 		document.getElementById('messageList').classList.add('reverseScrollDirection');
 		break;
 }
-	
+
 
 
 
@@ -257,9 +261,9 @@ client.on('Fourthwall.GiftDrawStarted', (response) => {
 	FourthwallGiftDrawStarted(response.data);
 })
 
-client.on('Fourthwall.GiftDrawEnd', (response) => {
+client.on('Fourthwall.GiftDrawEnded', (response) => {
 	console.debug(response.data);
-	FourthwallGiftDrawEnd(response.data);
+	FourthwallGiftDrawEnded(response.data);
 })
 
 
@@ -289,6 +293,8 @@ async function TwitchChatMessage(data) {
 	// Get divs
 	const messageContainerDiv = instance.querySelector("#messageContainer");
 	const firstMessageDiv = instance.querySelector("#firstMessage");
+	const sharedChatDiv = instance.querySelector("#sharedChat");
+	const sharedChatChannelDiv = instance.querySelector("#sharedChatChannel");
 	const replyDiv = instance.querySelector("#reply");
 	const replyUserDiv = instance.querySelector("#replyUser");
 	const replyMsgDiv = instance.querySelector("#replyMsg");
@@ -305,7 +311,24 @@ async function TwitchChatMessage(data) {
 	const firstMessage = data.message.firstMessage;
 	if (firstMessage && showMessage) {
 		firstMessageDiv.style.display = 'block';
-		messageContainerDiv.classList.add("firstMessageHighlight");
+		messageContainerDiv.classList.add("highlightMessage");
+	}
+
+	// Set Shared Chat
+	console.log(showTwitchSharedChat);
+	const isSharedChat = data.isSharedChat;
+	if (isSharedChat) {
+		if (showTwitchSharedChat > 1) {
+			if (!data.sharedChat.primarySource)
+			{
+				const sharedChatChannel = data.sharedChat.sourceRoom.name;
+				sharedChatDiv.style.display = 'block';
+				sharedChatChannelDiv.innerHTML = `💬 ${sharedChatChannel}`;
+				messageContainerDiv.classList.add("highlightMessage");
+			}
+		}
+		else if (!data.sharedChat.primarySource && showTwitchSharedChat == 0)
+			return;
 	}
 
 	// Set Reply Message
@@ -339,9 +362,13 @@ async function TwitchChatMessage(data) {
 	}
 
 	// Set the message data
-	const message = data.message.message;
+	let message = data.message.message;
 	const messageColor = data.message.color;
 	const role = data.message.role;
+
+	// Set furry mode
+	if (furryMode)
+		message = TranslateToFurry(message);
 
 	// Set message text
 	if (showMessage) {
@@ -351,6 +378,13 @@ async function TwitchChatMessage(data) {
 	// Set the "action" color
 	if (data.message.isMe)
 		messageDiv.style.color = messageColor;
+
+	// Remove the line break
+	if (inlineChat)
+	{
+		instance.querySelector("#colon-separator").style.display = `inline`;
+		instance.querySelector("#line-space").style.display = `none`;
+	}
 
 	// Render platform
 	if (showPlatform) {
@@ -802,7 +836,7 @@ function TwitchChatMessageDeleted(data) {
 	messagesToRemove.forEach(item => {
 		item.style.opacity = 0;
 		item.style.height = 0;
-		setTimeout(function() {
+		setTimeout(function () {
 			messageList.removeChild(item);
 		}, 1000);
 	});
@@ -881,6 +915,16 @@ function YouTubeMessage(data) {
 		messageDiv.innerText = data.message;
 	}
 
+	// Set furry mode
+	if (furryMode)
+		messageDiv.innerText = TranslateToFurry(data.message);
+
+	// Remove the line break
+	if (inlineChat)
+	{
+		instance.querySelector("#colon-separator").style.display = `inline`;
+		instance.querySelector("#line-space").style.display = `none`;
+	}
 
 	// Render platform
 	if (showPlatform) {
@@ -1193,7 +1237,7 @@ function KofiDonation(data) {
 		titleDiv.innerHTML = `${kofiIcon} ${user} donated $${amount}`;
 	else
 		titleDiv.innerHTML = `${kofiIcon} ${user} donated ${currency} ${amount}`;
-	
+
 	if (message != null)
 		contentDiv.innerHTML = `${message}`;
 
@@ -1232,7 +1276,7 @@ function KofiSubscription(data) {
 		titleDiv.innerHTML = `${kofiIcon} ${user} subscribed ($${amount})`;
 	else
 		titleDiv.innerHTML = `${kofiIcon} ${user} subscribed (${currency} ${amount})`;
-	
+
 	if (message != null)
 		contentDiv.innerHTML = `${message}`;
 
@@ -1388,12 +1432,12 @@ function FourthwallOrderPlaced(data) {
 	const message = DecodeHTMLString(data.statmessageus);
 	const itemImageUrl = data.variants[0].image;
 	const fourthwallProductImage = `<img src="${itemImageUrl}" class="productImage"/>`;
-	
+
 	let contents = "";
 
 	contents += fourthwallProductImage;
 
-	contents += "<br><br>"
+	contents += "<br><br>";
 
 	// If there user did not provide a username, just say "Someone"
 	if (user == undefined)
@@ -1408,9 +1452,9 @@ function FourthwallOrderPlaced(data) {
 	if (orderTotal == 0)
 		contents += ``;
 	else if (currency == "USD")
-		contents = ` ($${orderTotal})`;
+		contents += ` ($${orderTotal})`;
 	else
-		contents = ` (${orderTotal} ${currency})`;
+		contents += ` (${orderTotal} ${currency})`;
 
 	titleDiv.innerHTML = contents;
 
@@ -1427,12 +1471,92 @@ function FourthwallDonation(data) {
 	if (!showFourthwallAlerts)
 		return;
 
+	// Get a reference to the template
+	const template = document.getElementById('cardTemplate');
+
+	// Create a new instance of the template
+	const instance = template.content.cloneNode(true);
+
+	// Get divs
+	const cardDiv = instance.querySelector("#card");
+	const headerDiv = instance.querySelector("#header");
+	const avatarDiv = instance.querySelector("#avatar");
+	const iconDiv = instance.querySelector("#icon");
+	const titleDiv = instance.querySelector("#title");
+	const contentDiv = instance.querySelector("#content");
+
+	// Set the card background colors
+	cardDiv.classList.add('fourthwall');
+
+	// Set the text
+	let user = data.username;
+	const amount = data.amount;
+	const currency = data.currency;
+	const message = data.message;
+
+	let contents = "";
+
+	// If the user ordered more than one item, write how many items they ordered
+	contents += `${user} donated`;
+
+	// If the user spent money, put the order total
+	if (currency == "USD")
+		contents += ` $${amount}`;
+	else
+		contents += ` ${currency} ${amount}`;
+
+	titleDiv.innerHTML = contents;
+
+	// Add the custom message from the user
+	if (message.trim() != "")
+		contentDiv.innerHTML = `${message}`;
+	else
+		contentDiv.style.display = 'none'
+
+	AddMessageItem(instance, data.id);
 }
 
 function FourthwallSubscriptionPurchased(data) {
 	if (!showFourthwallAlerts)
 		return;
 
+	// Get a reference to the template
+	const template = document.getElementById('cardTemplate');
+
+	// Create a new instance of the template
+	const instance = template.content.cloneNode(true);
+
+	// Get divs
+	const cardDiv = instance.querySelector("#card");
+	const headerDiv = instance.querySelector("#header");
+	const avatarDiv = instance.querySelector("#avatar");
+	const iconDiv = instance.querySelector("#icon");
+	const titleDiv = instance.querySelector("#title");
+	const contentDiv = instance.querySelector("#content");
+
+	// Set the card background colors
+	cardDiv.classList.add('fourthwall');
+
+	// Set the text
+	let user = data.nickname;
+	const amount = data.amount;
+	const currency = data.currency;
+
+	let contents = "";
+
+	// If the user ordered more than one item, write how many items they ordered
+	contents += `${user} subscribed`;
+
+	// If the user spent money, put the order total
+	if (currency == "USD")
+		contents += ` ($${amount})`;
+	else
+		contents += ` (${currency} ${amount})`;
+
+	titleDiv.innerHTML = contents;
+	contentDiv.style.display = 'none'
+
+	AddMessageItem(instance, data.id);
 }
 
 function FourthwallGiftPurchase(data) {
@@ -1440,18 +1564,141 @@ function FourthwallGiftPurchase(data) {
 	if (!showFourthwallAlerts)
 		return;
 
+	// Get a reference to the template
+	const template = document.getElementById('cardTemplate');
+
+	// Create a new instance of the template
+	const instance = template.content.cloneNode(true);
+
+	// Get divs
+	const cardDiv = instance.querySelector("#card");
+	const headerDiv = instance.querySelector("#header");
+	const avatarDiv = instance.querySelector("#avatar");
+	const iconDiv = instance.querySelector("#icon");
+	const titleDiv = instance.querySelector("#title");
+	const contentDiv = instance.querySelector("#content");
+
+	// Set the card background colors
+	cardDiv.classList.add('blank');
+	titleDiv.classList.add('centerThatShitHomie');
+	contentDiv.classList.add('centerThatShitHomie');
+
+	// Set the text
+	let user = data.username;
+	const total = data.total;
+	const currency = data.currency;
+	const gifts = data.gifts.length;
+	const itemName = data.offer.name;
+	const itemImageUrl = data.offer.imageUrl;
+	const fourthwallProductImage = `<img src="${itemImageUrl}" class="productImage"/>`;
+	const message = DecodeHTMLString(data.statmessageus);
+
+	let contents = "";
+
+	contents += fourthwallProductImage;
+
+	contents += "<br><br>";
+
+	// If the user ordered more than one item, write how many items they ordered
+	contents += `${user} gifted`;
+
+	// If there is more than one gifted item, display the number of gifts
+	if (gifts > 1)
+		contents += ` ${gifts} x `;
+
+	// The name of the item to be given away
+	contents += ` ${itemName}`;
+
+	// If the user spent money, put the order total
+	if (currency == "USD")
+		contents += ` ($${total})`;
+	else
+		contents += ` (${currency}${total})`;
+
+	titleDiv.innerHTML = contents;
+
+	// Add the custom message from the user
+	if (message.trim() != "")
+		contentDiv.innerHTML = `${message}`;
+	else
+		contentDiv.style.display = 'none'
+
+	AddMessageItem(instance, data.id);
 }
 
 function FourthwallGiftDrawStarted(data) {
 	if (!showFourthwallAlerts)
 		return;
 
+	// Get a reference to the template
+	const template = document.getElementById('cardTemplate');
+
+	// Create a new instance of the template
+	const instance = template.content.cloneNode(true);
+
+	// Get divs
+	const cardDiv = instance.querySelector("#card");
+	const headerDiv = instance.querySelector("#header");
+	const avatarDiv = instance.querySelector("#avatar");
+	const iconDiv = instance.querySelector("#icon");
+	const titleDiv = instance.querySelector("#title");
+	const contentDiv = instance.querySelector("#content");
+
+	// Set the card background colors
+	cardDiv.classList.add('fourthwall');
+	titleDiv.classList.add('centerThatShitHomie');
+	contentDiv.classList.add('centerThatShitHomie');
+
+	// Set the text
+	const durationSeconds = data.durationSeconds;
+	const itemName = data.offer.name;
+
+	let contents = "";
+
+	// If the user ordered more than one item, write how many items they ordered
+	contents += `<h3>🎁 ${itemName} Giveaway!</h3>`;
+
+	titleDiv.innerHTML = contents;
+	contentDiv.innerHTML = `Type !join in the next ${durationSeconds} seconds for your chance to win!`;
+	//contentDiv.style.display = `none`;
+
+	AddMessageItem(instance, data.id);
 }
 
-function FourthwallGiftDrawEnd(data) {
+function FourthwallGiftDrawEnded(data) {
 	if (!showFourthwallAlerts)
 		return;
 
+	// Get a reference to the template
+	const template = document.getElementById('cardTemplate');
+
+	// Create a new instance of the template
+	const instance = template.content.cloneNode(true);
+
+	// Get divs
+	const cardDiv = instance.querySelector("#card");
+	const headerDiv = instance.querySelector("#header");
+	const avatarDiv = instance.querySelector("#avatar");
+	const iconDiv = instance.querySelector("#icon");
+	const titleDiv = instance.querySelector("#title");
+	const contentDiv = instance.querySelector("#content");
+
+	// Set the card background colors
+	cardDiv.classList.add('fourthwall');
+	titleDiv.classList.add('centerThatShitHomie');
+	contentDiv.classList.add('centerThatShitHomie');
+
+	let contents = "";
+
+	// If the user ordered more than one item, write how many items they ordered
+	contents += `<h3>🥳 GIVEAWAY ENDED 🥳</h3>`;
+	//contents += `Congratulations ${GetWinnersList(data.gifts)}!`
+
+	titleDiv.innerHTML = contents;
+	contentDiv.innerHTML = `Congratulations ${GetWinnersList(data.gifts)}!`;
+	//contentDiv.style.display = `none`;
+
+	AddMessageItem(instance, data.id);
 }
 
 
@@ -1479,13 +1726,15 @@ function GetBooleanParam(paramName, defaultValue) {
 	}
 }
 
-function GetIntParam(paramName) {
+function GetIntParam(paramName, defaultValue) {
 	const urlParams = new URLSearchParams(window.location.search);
 	const paramValue = urlParams.get(paramName);
 
 	if (paramValue === null) {
-		return null; // or undefined, or a default value, depending on your needs
+		return defaultValue; // or undefined, or a default value, depending on your needs
 	}
+
+	console.log(paramValue);
 
 	const intValue = parseInt(paramValue, 10); // Parse as base 10 integer
 
@@ -1524,14 +1773,23 @@ async function GetAvatar(username) {
 }
 
 async function GetPronouns(platform, username) {
-	const response = await client.getUserPronouns(platform, username);
-	const userFound = response.pronoun.userFound;
-	const pronouns = `${response.pronoun.pronounSubject}/${response.pronoun.pronounObject}`;
-
-	if (userFound)
-		return `${response.pronoun.pronounSubject}/${response.pronoun.pronounObject}`;
-	else
-		return '';
+	if (pronounMap.has(username)) {
+		console.debug(`Pronouns found for ${username}. Retrieving from hash map.`)
+		return pronounMap.get(username);
+	}
+	else {
+		console.debug(`No pronouns found for ${username}. Retrieving from alejo.io.`)
+		const response = await client.getUserPronouns(platform, username);
+		const userFound = response.pronoun.userFound;
+		const pronouns = `${response.pronoun.pronounSubject}/${response.pronoun.pronounObject}`;
+		
+		pronounMap.set(username, pronouns);
+	
+		if (userFound)
+			return pronouns;
+		else
+			return '';
+	}
 }
 
 // function IsImageUrl(url) {
@@ -1552,10 +1810,12 @@ function IsImageUrl(url) {
 function AddMessageItem(element, elementID, platform, userId) {
 	// Calculate the height of the div before inserting
 	const tempDiv = document.getElementById('IPutThisHereSoICanCalculateHowBigEachMessageIsSupposedToBeBeforeIAddItToTheMessageList');
-	tempDiv.appendChild(element);
+	const tempDivTwoElectricBoogaloo = document.createElement('div');
+	tempDivTwoElectricBoogaloo.appendChild(element);
+	tempDiv.appendChild(tempDivTwoElectricBoogaloo);
 
 	setTimeout(function () {
-		const calculatedHeight = tempDiv.clientHeight + "px";
+		const calculatedHeight = tempDivTwoElectricBoogaloo.offsetHeight + "px";
 
 		// Create a new line item to add to the message list later
 		var lineItem = document.createElement('li');
@@ -1568,16 +1828,18 @@ function AddMessageItem(element, elementID, platform, userId) {
 			lineItem.classList.add('reverseLineItemDirection');
 
 		// Move the element from the temp div to the new line item
-		while (tempDiv.firstChild) {
-			lineItem.appendChild(tempDiv.firstChild);
-		}
+		lineItem.appendChild(tempDiv.firstElementChild);
 
 		// Add the line item to the list and animate it
 		// We need to manually set the height as straight CSS can't animate on "height: auto"
 		messageList.appendChild(lineItem);
 		setTimeout(function () {
 			lineItem.className = lineItem.className + " show";
-			lineItem.style.height = calculatedHeight;
+			lineItem.style.maxHeight = calculatedHeight;
+			// After it's done animating, remove the height constraint in case the div needs to get bigger
+			setTimeout(function () {
+				lineItem.style.maxHeight = "none";
+			}, 1000);
 		}, 10);
 
 		// Remove old messages that have gone off screen to save memory
@@ -1585,25 +1847,22 @@ function AddMessageItem(element, elementID, platform, userId) {
 			messageList.removeChild(messageList.firstChild);
 		}
 
-		tempDiv.innerHTML = '';
-		
-		if (hideAfter > 0)
-		{
+		if (hideAfter > 0) {
 			setTimeout(function () {
 				lineItem.style.opacity = 0;
-				setTimeout(function() {
+				setTimeout(function () {
 					messageList.removeChild(lineItem);
 				}, 1000);
 			}, hideAfter * 1000);
 		}
 
-	}, 100);
+	}, 200);
 }
 
 function DecodeHTMLString(html) {
-    var txt = document.createElement("textarea");
-    txt.innerHTML = html;
-    return txt.value;
+	var txt = document.createElement("textarea");
+	txt.innerHTML = html;
+	return txt.value;
 }
 
 // I used Gemini for this shit so if it doesn't work, blame Google
@@ -1672,6 +1931,62 @@ function GetPermissionLevel(data, platform) {
 	}
 }
 
+function GetWinnersList(gifts) {
+	const winners = gifts.map(gift => gift.winner);
+	const numWinners = winners.length;
+
+	if (numWinners === 0) {
+		return "";
+	} else if (numWinners === 1) {
+		return winners[0];
+	} else if (numWinners === 2) {
+		return `${winners[0]} and ${winners[1]}`;
+	} else {
+		const lastWinner = winners.pop();
+		const secondLastWinner = winners.pop();
+		return `${winners.join(", ")}, ${secondLastWinner} and ${lastWinner}`;
+	}
+}
+
+function TranslateToFurry(sentence) {
+	const words = sentence.toLowerCase().split(/\b/);
+  
+	const furryWords = words.map(word => {
+	  if (/\w+/.test(word)) {
+		let newWord = word;
+  
+		// Common substitutions
+		newWord = newWord.replace(/l/g, 'w');
+		newWord = newWord.replace(/r/g, 'w');
+		newWord = newWord.replace(/th/g, 'f');
+		newWord = newWord.replace(/you/g, 'yous');
+		newWord = newWord.replace(/my/g, 'mah');
+		newWord = newWord.replace(/me/g, 'meh');
+		newWord = newWord.replace(/am/g, 'am');
+		newWord = newWord.replace(/is/g, 'is');
+		newWord = newWord.replace(/are/g, 'are');
+		newWord = newWord.replace(/very/g, 'vewy');
+		newWord = newWord.replace(/pretty/g, 'pwetty');
+		newWord = newWord.replace(/little/g, 'wittle');
+		newWord = newWord.replace(/nice/g, 'nyce');
+  
+		// Random additions
+		if (Math.random() < 0.15) {
+		  newWord += ' nya~';
+		} else if (Math.random() < 0.1) {
+		  newWord += ' >w<';
+		} else if (Math.random() < 0.05) {
+		  newWord += ' owo';
+		}
+  
+		return newWord;
+	  }
+	  return word;
+	});
+  
+	return furryWords.join('');
+  }
+
 
 
 ///////////////////////////////////
@@ -1697,126 +2012,3 @@ function SetConnectionStatus(connected) {
 		statusContainer.style.opacity = 1;
 	}
 }
-
-// let data = `{
-//     "bits": 1,
-//     "cheerEmotes": [
-//         {
-//             "bits": 1,
-//             "color": "#979797",
-//             "type": "CheerEmote",
-//             "name": "Cheer",
-//             "startIndex": 0,
-//             "endIndex": 5,
-//             "imageUrl": "https://d3aqoihi2n8ty8.cloudfront.net/actions/cheer/dark/animated/1/4.gif"
-//         }
-//     ],
-//     "message": {
-//         "internal": false,
-//         "msgId": "ac304b97-35fd-4623-9ab3-2e68f24e770a",
-//         "userId": "24586202",
-//         "username": "cookievscookie",
-//         "role": 1,
-//         "subscriber": true,
-//         "subscriptionTier": "1000",
-//         "displayName": "CookieVsCookie",
-//         "color": "#DEC27A",
-//         "channel": "nutty",
-//         "message": "Cheer1 wasting all of my money 1 bit at time",
-//         "isHighlighted": false,
-//         "isMe": false,
-//         "isCustomReward": false,
-//         "isAnonymous": false,
-//         "isReply": false,
-//         "bits": 1,
-//         "firstMessage": false,
-//         "returningChatter": false,
-//         "hasBits": true,
-//         "emotes": [],
-//         "cheerEmotes": [
-//             {
-//                 "bits": 1,
-//                 "color": "#979797",
-//                 "type": "CheerEmote",
-//                 "name": "Cheer",
-//                 "startIndex": 0,
-//                 "endIndex": 5,
-//                 "imageUrl": "https://d3aqoihi2n8ty8.cloudfront.net/actions/cheer/dark/animated/1/4.gif"
-//             }
-//         ],
-//         "badges": [
-//             {
-//                 "name": "subscriber",
-//                 "version": "3",
-//                 "imageUrl": "https://static-cdn.jtvnw.net/badges/v1/c2d0acb4-a706-43a1-9d2b-0458cde2ba93/3",
-//                 "info": "4"
-//             },
-//             {
-//                 "name": "share-the-love",
-//                 "version": "1",
-//                 "imageUrl": "https://static-cdn.jtvnw.net/badges/v1/2de71f4f-b152-4308-a426-127a4cf8003a/3",
-//                 "info": ""
-//             }
-//         ],
-//         "monthsSubscribed": 4,
-//         "isTest": false,
-//         "sharedChat": false,
-//         "sourceBadges": []
-//     },
-//     "user": {
-//         "role": 1,
-//         "badges": [
-//             {
-//                 "name": "subscriber",
-//                 "version": "3",
-//                 "imageUrl": "https://static-cdn.jtvnw.net/badges/v1/c2d0acb4-a706-43a1-9d2b-0458cde2ba93/3",
-//                 "info": "4"
-//             },
-//             {
-//                 "name": "share-the-love",
-//                 "version": "1",
-//                 "imageUrl": "https://static-cdn.jtvnw.net/badges/v1/2de71f4f-b152-4308-a426-127a4cf8003a/3",
-//                 "info": ""
-//             }
-//         ],
-//         "color": "#DEC27A",
-//         "subscribed": true,
-//         "subscriptionTier": "1000",
-//         "monthsSubscribed": 4,
-//         "id": "24586202",
-//         "login": "cookievscookie",
-//         "name": "CookieVsCookie",
-//         "type": "twitch"
-//     },
-//     "messageId": "ac304b97-35fd-4623-9ab3-2e68f24e770a",
-//     "meta": {
-//         "internal": false,
-//         "firstMessage": false,
-//         "returningChatter": false,
-//         "isHighlighted": false,
-//         "isMe": false,
-//         "isCustomReward": false,
-//         "isTest": false
-//     },
-//     "anonymous": false,
-//     "text": "Cheer1 wasting all of my money 1 bit at time",
-//     "emotes": [],
-//     "parts": [
-//         {
-//             "bits": 1,
-//             "color": "#979797",
-//             "imageUrl": "https://d3aqoihi2n8ty8.cloudfront.net/actions/cheer/dark/animated/1/4.gif",
-//             "type": "cheer",
-//             "text": "Cheer"
-//         },
-//         {
-//             "type": "text",
-//             "text": " wasting all of my money 1 bit at time"
-//         }
-//     ],
-//     "isReply": false,
-//     "isSharedChat": false,
-//     "isTest": false
-// }`;
-
-// TwitchChatMessage(JSON.parse(data));
