@@ -1,57 +1,17 @@
 {
 	"settings": [
 		{
-			"id": "showPlatform",
-			"label": "Show Platform",
+			"id": "testWidgetButton",
+			"label": "Send Test Alert",
 			"description": "",
-			"type": "checkbox",
-			"defaultValue": true,
-			"group": "Appearance"
+			"type": "button",
+			"callFunction": "testWidget",
+			"group": "Test Alerts"
 		},
 		{
 			"id": "showAvatar",
 			"label": "Show Avatar",
 			"description": "",
-			"type": "checkbox",
-			"defaultValue": true,
-			"group": "Appearance"
-		},
-		{
-			"id": "showTimestamps",
-			"label": "Show Timestamps",
-			"description": "",
-			"type": "checkbox",
-			"defaultValue": true,
-			"group": "Appearance"
-		},
-		{
-			"id": "showBadges",
-			"label": "Show Badges",
-			"description": "",
-			"type": "checkbox",
-			"defaultValue": true,
-			"group": "Appearance"
-		},
-		{
-			"id": "showPronouns",
-			"label": "Show Pronouns",
-			"description": "",
-			"type": "checkbox",
-			"defaultValue": true,
-			"group": "Appearance"
-		},
-		{
-			"id": "showUsername",
-			"label": "Show Username",
-			"description": "",
-			"type": "checkbox",
-			"defaultValue": true,
-			"group": "Appearance"
-		},
-		{
-			"id": "showMessage",
-			"label": "Show Message",
-			"description": "Honestly, if you turn this off, you're stupid lmao",
 			"type": "checkbox",
 			"defaultValue": true,
 			"group": "Appearance"
@@ -75,13 +35,11 @@
 			"group": "Appearance"
 		},
 		{
-			"id": "lineSpacing",
-			"label": "Line Spacing",
-			"description": "",
-			"type": "number",
-			"min": 0,
-			"defaultValue": 1.7,
-			"step": ".1",
+			"id": "useCustomBackground",
+			"label": "Use Custom Background Color",
+			"description": "If off, platform colors will be used instead",
+			"type": "checkbox",
+			"defaultValue": false,
 			"group": "Appearance"
 		},
 		{
@@ -89,7 +47,8 @@
 			"label": "Background",
 			"description": "",
 			"type": "color",
-			"defaultValue": "#000000",
+			"defaultValue": "#2196f3",
+			"showIf": "useCustomBackground",
 			"group": "Appearance"
 		},
 		{
@@ -101,109 +60,121 @@
 			"min": 0,
 			"max": 1,
 			"step": ".01",
+			"showIf": "useCustomBackground",
 			"group": "Appearance"
 		},
 		{
 			"id": "hideAfter",
 			"label": "Hide After",
-			"description": "Messages fade after X seconds (0 to disable)",
+			"description": "Alerts will hide for X seconds",
 			"type": "number",
-			"min": 0,
+			"min": 1,
 			"max": 120,
-			"defaultValue": 0,
+			"defaultValue": 8,
 			"group": "General"
 		},
 		{
-			"id": "excludeCommands",
-			"label": "Exclude Commands",
-			"description": "Hide messages starting with \"!\"",
+			"id": "showAnimation",
+			"label": "Show Animation",
+			"description": "",
+			"type": "select",
+			"options": [
+				{
+					"value": "fade-in",
+					"label": "Fade In"
+				},
+				{
+					"value": "slide-in-from-top",
+					"label": "Slide Down From Top"
+				},
+				{
+					"value": "slide-in-from-bottom",
+					"label": "Slide Up From Bottom"
+				},
+				{
+					"value": "slide-in-from-left",
+					"label": "Slide In From Left"
+				},
+				{
+					"value": "slide-in-from-right",
+					"label": "Slide In From Right"
+				}
+			],
+			"defaultValue": "slide-in-from-bottom",
+			"group": "General"
+		},
+		{
+			"id": "hideAnimation",
+			"label": "Hide Animation",
+			"description": "",
+			"type": "select",
+			"options": [
+				{
+					"value": "fade-out",
+					"label": "Fade Out"
+				},
+				{
+					"value": "slide-out-top",
+					"label": "Slide Up And Out"
+				},
+				{
+					"value": "slide-out-bottom",
+					"label": "Slide Down And Out"
+				},
+				{
+					"value": "slide-out-left",
+					"label": "Slide Out Left"
+				},
+				{
+					"value": "slide-out-right",
+					"label": "Slide Out Right"
+				}
+			],
+			"defaultValue": "slide-out-bottom",
+			"group": "General"
+		},
+		{
+			"id": "alignment",
+			"label": "Alignment",
+			"description": "",
+			"type": "select",
+			"options": [
+				{
+					"value": "align-to-top",
+					"label": "Align To Top"
+				},
+				{
+					"value": "align-to-bottom",
+					"label": "Align To Bottom"
+				}
+			],
+			"defaultValue": "align-to-bottom",
+			"group": "General"
+		},
+		{
+			"id": "showMesesages",
+			"label": "Show Messages",
+			"description": "Such as donation messages, subscriber messages etc.",
 			"type": "checkbox",
 			"defaultValue": true,
 			"group": "General"
 		},
 		{
-			"id": "ignoreChatters",
-			"label": "Ignore Chatters",
-			"description": "Ignored chatters will not be shown",
-			"type": "text",
-			"defaultValue": "StreamElements,Streamlabs",
-			"group": "General"
-		},
-		{
-			"id": "scrollDirection",
-			"label": "Scroll Direction",
+			"id": "showTwitchFollows",
+			"label": "New Followers",
 			"description": "",
-			"type": "select",
-			"options": [
-				{
-					"value": 1,
-					"label": "Normal"
-				},
-				{
-					"value": 2,
-					"label": "Reversed"
-				}
-			],
-			"defaultValue": 1,
-			"group": "General"
-		},
-		{
-			"id": "inlineChat",
-			"label": "In-line Chat",
-			"description": "Remove the line space after the username",
 			"type": "checkbox",
 			"defaultValue": false,
-			"group": "General"
+			"group": "Which Twitch alerts do you want to see?"
 		},
 		{
-			"id": "imageEmbedPermissionLevel",
-			"label": "Embed Images",
-			"description": "Automatically embed images for these users",
-			"type": "select",
-			"options": [
-				{
-					"value": 40,
-					"label": "Broadcaster"
-				},
-				{
-					"value": 30,
-					"label": "Mods & Broadcaster"
-				},
-				{
-					"value": 20,
-					"label": "VIPs, Mods & Broadcaster"
-				},
-				{
-					"value": 15,
-					"label": "Subs, VIPs, Mods & Broadcaster"
-				},
-				{
-					"value": 10,
-					"label": "Everyone"
-				},
-				{
-					"value": 69420,
-					"label": "Nobody"
-				}
-			],
-			"defaultValue": 20,
-			"group": "General"
-		},
-		{
-			"id": "showTwitchMessages",
-			"label": "Chat Messages",
-			"description": "",
-			"type": "checkbox",
-			"defaultValue": true,
-			"group": "Which Twitch messages do you want to see?"
-		},
-		{
-			"id": "showTwitchAnnouncements",
-			"label": "Announcements",
-			"description": "",
-			"type": "checkbox",
-			"defaultValue": true,
-			"group": "Which Twitch messages do you want to see?"
+			"id": "twitchFollowAction",
+			"label": "",
+			"description": "Also run this Streamer.bot Action",
+			"type": "sb-actions",
+			"defaultValue": "",
+			"showIf": "showTwitchFollows",
+			"group": "Which Twitch alerts do you want to see?"
 		},
 		{
 			"id": "showTwitchSubs",
@@ -211,7 +182,16 @@
 			"description": "",
 			"type": "checkbox",
 			"defaultValue": true,
-			"group": "Which Twitch messages do you want to see?"
+			"group": "Which Twitch alerts do you want to see?"
+		},
+		{
+			"id": "twitchSubAction",
+			"label": "",
+			"description": "Also run this Streamer.bot Action",
+			"type": "sb-actions",
+			"defaultValue": "",
+			"showIf": "showTwitchSubs",
+			"group": "Which Twitch alerts do you want to see?"
 		},
 		{
 			"id": "showTwitchChannelPointRedemptions",
@@ -219,7 +199,33 @@
 			"description": "",
 			"type": "checkbox",
 			"defaultValue": true,
-			"group": "Which Twitch messages do you want to see?"
+			"group": "Which Twitch alerts do you want to see?"
+		},
+		{
+			"id": "twitchChannelPointRedemptionAction",
+			"label": "",
+			"description": "Also run this Streamer.bot Action",
+			"type": "sb-actions",
+			"defaultValue": "",
+			"showIf": "showTwitchChannelPointRedemptions",
+			"group": "Which Twitch alerts do you want to see?"
+		},
+		{
+			"id": "showTwitchCheers",
+			"label": "Cheers",
+			"description": "",
+			"type": "checkbox",
+			"defaultValue": true,
+			"group": "Which Twitch alerts do you want to see?"
+		},
+		{
+			"id": "twitchCheerAction",
+			"label": "",
+			"description": "Also run Streamer.bot Action",
+			"type": "sb-actions",
+			"defaultValue": "",
+			"showIf": "showTwitchCheers",
+			"group": "Which Twitch alerts do you want to see?"
 		},
 		{
 			"id": "showTwitchRaids",
@@ -227,37 +233,16 @@
 			"description": "",
 			"type": "checkbox",
 			"defaultValue": true,
-			"group": "Which Twitch messages do you want to see?"
+			"group": "Which Twitch alerts do you want to see?"
 		},
 		{
-			"id": "showTwitchSharedChat",
-			"label": "Shared Chat Messages",
-			"description": "",
-			"type": "select",
-			"options": [
-				{
-					"value":  2,
-					"label": "Show & Highlight"
-				},
-				{
-					"value": 1,
-					"label": "Show but do not highlight"
-				},
-				{
-					"value": 0,
-					"label": "Do not show"
-				}
-			],
-			"defaultValue": 2,
-			"group": "Which Twitch messages do you want to see?"
-		},
-		{
-			"id": "showYouTubeMessages",
-			"label": "Chat Messages",
-			"description": "",
-			"type": "checkbox",
-			"defaultValue": true,
-			"group": "Which YouTube messages do you want to see?"
+			"id": "twitchRaidAction",
+			"label": "",
+			"description": "Also run this Streamer.bot Action",
+			"type": "sb-actions",
+			"defaultValue": "",
+			"showIf": "showTwitchRaids",
+			"group": "Which Twitch alerts do you want to see?"
 		},
 		{
 			"id": "showYouTubeSuperChats",
@@ -265,7 +250,16 @@
 			"description": "",
 			"type": "checkbox",
 			"defaultValue": true,
-			"group": "Which YouTube messages do you want to see?"
+			"group": "Which YouTube alerts do you want to see?"
+		},
+		{
+			"id": "youtubeSuperChatAction",
+			"label": "",
+			"description": "Also run this Streamer.bot Action",
+			"type": "sb-actions",
+			"defaultValue": "",
+			"showIf": "showYouTubeSuperChats",
+			"group": "Which YouTube alerts do you want to see?"
 		},
 		{
 			"id": "showYouTubeSuperStickers",
@@ -273,7 +267,16 @@
 			"description": "",
 			"type": "checkbox",
 			"defaultValue": true,
-			"group": "Which YouTube messages do you want to see?"
+			"group": "Which YouTube alerts do you want to see?"
+		},
+		{
+			"id": "youtubeSuperStickerAction",
+			"label": "",
+			"description": "Also run this Streamer.bot Action",
+			"type": "sb-actions",
+			"defaultValue": "",
+			"showIf": "showYouTubeSuperStickers",
+			"group": "Which YouTube alerts do you want to see?"
 		},
 		{
 			"id": "showYouTubeMemberships",
@@ -281,7 +284,16 @@
 			"description": "",
 			"type": "checkbox",
 			"defaultValue": true,
-			"group": "Which YouTube messages do you want to see?"
+			"group": "Which YouTube alerts do you want to see?"
+		},
+		{
+			"id": "youtubeMembershipAction",
+			"label": "",
+			"description": "Also run this Streamer.bot Action",
+			"type": "sb-actions",
+			"defaultValue": "",
+			"showIf": "showYouTubeMemberships",
+			"group": "Which YouTube alerts do you want to see?"
 		},
 		{
 			"id": "showStreamlabsDonations",
@@ -289,7 +301,16 @@
 			"description": "<a href=\"https://docs.streamer.bot/guide/integrations/streamlabs\" target=\"_blank\">Click to connect</a>",
 			"type": "checkbox",
 			"defaultValue": true,
-			"group": "Which donation messages do you want to see?"
+			"group": "Which donation alerts do you want to see?"
+		},
+		{
+			"id": "streamlabsDonationAction",
+			"label": "",
+			"description": "Also run this Streamer.bot Action",
+			"type": "sb-actions",
+			"defaultValue": "",
+			"showIf": "showStreamlabsDonations",
+			"group": "Which donation alerts do you want to see?"
 		},
 		{
 			"id": "showStreamElementsTips",
@@ -297,7 +318,16 @@
 			"description": "<a href=\"https://docs.streamer.bot/guide/integrations/streamelements\" target=\"_blank\">Click to connect</a>",
 			"type": "checkbox",
 			"defaultValue": true,
-			"group": "Which donation messages do you want to see?"
+			"group": "Which donation alerts do you want to see?"
+		},
+		{
+			"id": "streamelementsTipAction",
+			"label": "",
+			"description": "Also run this Streamer.bot Action",
+			"type": "sb-actions",
+			"defaultValue": "",
+			"showIf": "showStreamElementsTips",
+			"group": "Which donation alerts do you want to see?"
 		},
 		{
 			"id": "showPatreonMemberships",
@@ -305,7 +335,16 @@
 			"description": "<a href=\"https://docs.streamer.bot/guide/integrations/patreon\" target=\"_blank\">Click to connect</a>",
 			"type": "checkbox",
 			"defaultValue": true,
-			"group": "Which donation messages do you want to see?"
+			"group": "Which donation alerts do you want to see?"
+		},
+		{
+			"id": "patreonMembershipActions",
+			"label": "",
+			"description": "Also run this Streamer.bot Action",
+			"type": "sb-actions",
+			"defaultValue": "",
+			"showIf": "showPatreonMemberships",
+			"group": "Which donation alerts do you want to see?"
 		},
 		{
 			"id": "showKofiDonations",
@@ -313,7 +352,16 @@
 			"description": "<a href=\"https://docs.streamer.bot/guide/integrations/ko-fi\" target=\"_blank\">Click to connect</a>",
 			"type": "checkbox",
 			"defaultValue": true,
-			"group": "Which donation messages do you want to see?"
+			"group": "Which donation alerts do you want to see?"
+		},
+		{
+			"id": "kofiDonationAction",
+			"label": "",
+			"description": "Also run this Streamer.bot Action",
+			"type": "sb-actions",
+			"defaultValue": "",
+			"showIf": "showKofiDonations",
+			"group": "Which donation alerts do you want to see?"
 		},
 		{
 			"id": "showTipeeeStreamDonations",
@@ -321,7 +369,16 @@
 			"description": "<a href=\"https://docs.streamer.bot/guide/integrations/tipeee-stream\" target=\"_blank\">Click to connect</a>",
 			"type": "checkbox",
 			"defaultValue": true,
-			"group": "Which donation messages do you want to see?"
+			"group": "Which donation alerts do you want to see?"
+		},
+		{
+			"id": "tipeeestreamDonationAction",
+			"label": "",
+			"description": "Also run this Streamer.bot Action",
+			"type": "sb-actions",
+			"defaultValue": "",
+			"showIf": "showTipeeeStreamDonations",
+			"group": "Which donation alerts do you want to see?"
 		},
 		{
 			"id": "showFourthwallAlerts",
@@ -329,31 +386,16 @@
 			"description": "<a href=\"https://docs.streamer.bot/guide/integrations/fourthwall\" target=\"_blank\">Click to connect</a>",
 			"type": "checkbox",
 			"defaultValue": true,
-			"group": "Which donation messages do you want to see?"
+			"group": "Which donation alerts do you want to see?"
 		},
 		{
-			"id": "furryMode",
-			"label": "Furry Mode",
-			"description": "Meow",
-			"type": "checkbox",
-			"defaultValue": false,
-			"group": "Very Important Stuff"
-		},
-		{
-			"id": "address",
-			"label": "Address",
-			"description": "Streamer.bot Websocket Server Address",
-			"type": "text",
-			"defaultValue": "127.0.0.1",
-			"group": "Advanced"
-		},
-		{
-			"id": "port",
-			"label": "Port",
-			"description": "Streamer.bot Websocket Server Port",
-			"type": "text",
-			"defaultValue": "8080",
-			"group": "Advanced"
+			"id": "fourthwallAlertAction",
+			"label": "",
+			"description": "Also run this Streamer.bot Action",
+			"type": "sb-actions",
+			"defaultValue": "",
+			"showIf": "showFourthwallAlerts",
+			"group": "Which donation alerts do you want to see?"
 		}
 	]
 }

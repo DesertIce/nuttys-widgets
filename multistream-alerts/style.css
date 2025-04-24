@@ -1,9 +1,9 @@
 * {
 	margin: 0;
 	padding: 0;
-	--margin: 40px;
-	/* --border-radius: 20px; */
-	font-size: 30px;
+	--margin: 0.5em;
+	--border-radius: 1em;
+	/* font-size: 30px; */
 	/* --line-spacing: 1.7em; */
 }
 
@@ -37,22 +37,28 @@ html {
 }
 
 #mainContainer {
-	display: block;
 	position: absolute;
 	width: 100%;
-	padding: var(--margin);
+	height: 100%;
+	padding: calc(2 * var(--margin));
 	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	/* justify-content: flex-end; */
 }
 
 #alertBox {
-	display: flex;
-	padding: 0.5em;
+	/* padding: 0.5em; */
 	border-radius: 0.75em;
 	filter: drop-shadow(15px 15px 7px rgba(0, 0, 0, 1));
 	position: relative;
-	align-items: center;
 	overflow: hidden;
+	box-sizing: border-box;
 	/* text-align: center; */
+	/* position: relative; */
+	/* transition: all 1s ease-in-out; */
+	/* min-height: 0px;
+	max-height: 0px; */
 }
 
 /* #alertBox::before {
@@ -71,10 +77,44 @@ html {
 	z-index: -1;
 } */
 
+#theContentThatShowsFirstInsteadOfSecond {
+	display: flex;
+	align-items: center;
+	z-index: 1;
+	/* position: absolute; */
+	/* left: var(--margin);
+	top: var(--margin); */
+	transition: inherit;
+	padding: var(--margin) calc( 1.5 * var(--margin));
+	display: none;
+}
+
+#theContentThatShowsLastInsteadOfFirst {
+	/* position: absolute; */
+	display: inline-block;
+	align-items: center;
+	z-index: 0;
+	/* position: absolute; */
+	/* left: var(--margin);
+	top: var(--margin); */
+	padding: var(--margin) calc( 1.5 * var(--margin));
+	transition: inherit;
+	display: none;
+}
+
 #avatar {
 	display: inline;
 	max-width: 100%;
 	height: 4em;
+	filter: drop-shadow(0px 0px 7px rgba(0, 0, 0, 0.5));
+	object-fit: cover;
+	margin-right: 0.75em;
+}
+
+#avatarButItsSmallerThanTheOneFromBeforeForPrettinessPurposes {
+	display: inline;
+	max-width: 100%;
+	height: 2em;
 	filter: drop-shadow(0px 0px 7px rgba(0, 0, 0, 0.5));
 	object-fit: cover;
 	margin-right: 0.75em;
@@ -89,6 +129,11 @@ html {
 	font-weight: 600;
 }
 
+#usernameTheSecond {
+	font-size: 1em;
+	font-weight: 600;
+}
+
 #description {
 	font-size: 1em;
 	font-weight: 400;
@@ -99,12 +144,160 @@ html {
 	font-weight: 400;
 }
 
-.profilePic {	
+.profilePic {
 	border-radius: 50%;
 }
 
-.square {	
+.square {
 	border-radius: 0.5em;
+}
+
+.emote {
+	height: 1.5em;
+	margin: 1px;
+	transform: translate(0px, 0.4em);
+}
+
+.bits {
+	background: #adadad46;
+	border-radius: calc(var(--border-radius) / 2);
+	font-size: 0.7em;
+	padding: 5px 10px;
+}
+
+#message {
+	width: calc(100% - 2 * var(--margin));
+	z-index: 0;
+	left: var(--margin);
+	top: var(--margin);
+	transition: inherit;
+	font-style: italic;
+}
+
+@keyframes fade-in {
+	0% {
+		opacity: 0;
+	}
+
+	100% {
+		opacity: 1;
+	}
+}
+
+@keyframes fade-out {
+	0% {
+		opacity: 1;
+	}
+
+	100% {
+		opacity: 0;
+	}
+}@keyframes slide-in-from-top {
+	0% {
+		transform: translateY(-100%);
+		opacity: 0;
+	}
+
+	100% {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+
+@keyframes slide-in-from-top {
+	0% {
+		transform: translateY(-100%);
+		opacity: 0;
+	}
+
+	100% {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+
+@keyframes slide-out-top {
+	0% {
+		transform: translateY(0);
+		opacity: 1;
+	}
+
+	100% {
+		transform: translateY(-100%);
+		opacity: 0;
+	}
+}
+
+@keyframes slide-in-from-bottom {
+	0% {
+		transform: translateY(100%);
+		opacity: 0;
+	}
+
+	100% {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+
+@keyframes slide-out-bottom {
+	0% {
+		transform: translateY(0);
+		opacity: 1;
+	}
+
+	100% {
+		transform: translateY(100%);
+		opacity: 0;
+	}
+}
+
+@keyframes slide-in-from-left {
+	0% {
+		transform: translateX(-100%);
+		opacity: 0;
+	}
+
+	100% {
+		transform: translateX(0);
+		opacity: 1;
+	}
+}
+
+@keyframes slide-out-left {
+	0% {
+		transform: translateX(0);
+		opacity: 1;
+	}
+
+	100% {
+		transform: translateX(-100%);
+		opacity: 0;
+	}
+}
+
+@keyframes slide-in-from-right {
+	0% {
+		transform: translateX(100%);
+		opacity: 0;
+	}
+
+	100% {
+		transform: translateX(0);
+		opacity: 1;
+	}
+}
+
+@keyframes slide-out-right {
+	0% {
+		transform: translateX(0);
+		opacity: 1;
+	}
+
+	100% {
+		transform: translateX(100%);
+		opacity: 0;
+	}
 }
 
 /*****************/
@@ -165,6 +358,10 @@ html {
 
 .highlightMessage {
 	background: #adadad46;
+}
+
+.customBackground {
+	background: var(--custom-background);
 }
 
 /****************/
