@@ -31,6 +31,7 @@ const hideAfter = GetIntParam("hideAfter", 0);
 const excludeCommands = GetBooleanParam("excludeCommands", true);
 const ignoreChatters = urlParams.get("ignoreChatters") || "";
 const scrollDirection = GetIntParam("scrollDirection", 1);
+const groupConsecutiveMessages = GetBooleanParam("groupConsecutiveMessages", false);
 const inlineChat = GetBooleanParam("inlineChat", false);
 const imageEmbedPermissionLevel = GetIntParam("imageEmbedPermissionLevel", 20);
 
@@ -54,6 +55,8 @@ const showTipeeeStreamDonations = GetBooleanParam("showTipeeeStreamDonations", t
 const showFourthwallAlerts = GetBooleanParam("showFourthwallAlerts", true);
 
 const furryMode = GetBooleanParam("furryMode", false);
+
+const animationSpeed = GetIntParam("animationSpeed", 0.1);
 
 // Set fonts for the widget
 document.body.style.fontFamily = font;
@@ -82,6 +85,9 @@ switch (scrollDirection) {
 		document.getElementById('messageList').classList.add('reverseScrollDirection');
 		break;
 }
+
+// Set the animation speed
+document.documentElement.style.setProperty('--animation-speed', `${animationSpeed}s`);
 
 
 
@@ -444,7 +450,7 @@ async function TwitchChatMessage(data) {
 	// Hide the header if the same username sends a message twice in a row
 	// EXCEPT when the scroll direction is set to reverse (scrollDirection == 2)
 	const messageList = document.getElementById("messageList");
-	if (messageList.children.length > 0 && scrollDirection != 2) {
+	if (groupConsecutiveMessages && messageList.children.length > 0 && scrollDirection != 2) {
 		const lastPlatform = messageList.lastChild.dataset.platform;
 		const lastUserId = messageList.lastChild.dataset.userId;
 		if (lastPlatform == "twitch" && lastUserId == data.user.id)
@@ -1013,7 +1019,7 @@ function YouTubeMessage(data) {
 	// Hide the header if the same username sends a message twice in a row
 	// EXCEPT when the scroll direction is set to reverse (scrollDirection == 2)
 	const messageList = document.getElementById("messageList");
-	if (messageList.children.length > 0 && scrollDirection != 2) {
+	if (groupConsecutiveMessages && messageList.children.length > 0 && scrollDirection != 2) {
 		const lastPlatform = messageList.lastChild.dataset.platform;
 		const lastUserId = messageList.lastChild.dataset.userId;
 		if (lastPlatform == "youtube" && lastUserId == data.user.id)

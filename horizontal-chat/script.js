@@ -33,6 +33,7 @@ const opacity = urlParams.get("opacity") || "0.5";
 const hideAfter = GetIntParam("hideAfter", 0);
 const excludeCommands = GetBooleanParam("excludeCommands", true);
 const ignoreChatters = urlParams.get("ignoreChatters") || "";
+const groupConsecutiveMessages = GetBooleanParam("groupConsecutiveMessages", true);
 
 const showTwitchMessages = GetBooleanParam("showTwitchMessages", true);
 const showTwitchAnnouncements = GetBooleanParam("showTwitchAnnouncements", true);
@@ -55,6 +56,8 @@ const showFourthwallAlerts = GetBooleanParam("showFourthwallAlerts", true);
 
 const furryMode = GetBooleanParam("furryMode", false);
 
+const animationSpeed = GetIntParam("animationSpeed", 0.5);
+
 // Set fonts for the widget
 document.body.style.fontFamily = font;
 document.body.style.fontSize = `${fontSize}px`;
@@ -69,6 +72,9 @@ document.documentElement.style.setProperty('--background', `${background}${hexOp
 
 // Get a list of chatters to ignore
 const ignoreUserList = ignoreChatters.split(',').map(item => item.trim().toLowerCase()) || [];
+
+// Set the animation speed
+document.documentElement.style.setProperty('--animation-speed', `${animationSpeed}s`);
 
 
 
@@ -393,7 +399,7 @@ async function TwitchChatMessage(data) {
 
 	// Hide the header if the same username sends a message twice in a row
 	const messageList = document.getElementById("messageList");
-	if (messageList.children.length > 0) {
+	if (groupConsecutiveMessages && messageList.children.length > 0) {
 		const lastPlatform = messageList.lastChild.dataset.platform;
 		const lastUserId = messageList.lastChild.dataset.userId;
 		if (lastPlatform == "twitch" && lastUserId == data.user.id)
@@ -709,7 +715,7 @@ function YouTubeMessage(data) {
 
 	// Hide the header if the same username sends a message twice in a row
 	const messageList = document.getElementById("messageList");
-	if (messageList.children.length > 0) {
+	if (groupConsecutiveMessages && messageList.children.length > 0) {
 		const lastPlatform = messageList.lastChild.dataset.platform;
 		const lastUserId = messageList.lastChild.dataset.userId;
 		if (lastPlatform == "youtube" && lastUserId == data.user.id)
@@ -1197,23 +1203,24 @@ function ShowAlert(message, background = null, duration = animationDuration) {
 	const messageListDiv = document.querySelector("#messageList");
 	const backgroundDiv = document.querySelector("#background");
 	const alertBoxDiv = document.querySelector("#alertBox");
+	const alertBoxContent = document.querySelector("#alertBoxContent");
 
 	// Set the message text
-	alertBoxDiv.innerHTML = message;
+	alertBoxContent.innerHTML	 = message;
 
 	// Set the background
 	alertBoxDiv.classList.add(background);
 
 	// Start the animation
 	widgetLocked = true;
-	messageListDiv.style.animation = 'hideAlertBox 0.5s ease-in-out forwards';
-	backgroundDiv.style.animation = 'hideAlertBox 0.5s ease-in-out forwards';
+	// messageListDiv.style.animation = 'hideAlertBox 0.5s ease-in-out forwards';
+	// backgroundDiv.style.animation = 'hideAlertBox 0.5s ease-in-out forwards';
 	alertBoxDiv.style.animation = 'showAlertBox 0.5s ease-in-out forwards';
 
 	// To stop the animation (remove the animation property):
 	setTimeout(() => {
-		messageListDiv.style.animation = 'showAlertBox 0.5s ease-in-out forwards';
-		backgroundDiv.style.animation = 'showAlertBox 0.5s ease-in-out forwards';
+		// messageListDiv.style.animation = 'showAlertBox 0.5s ease-in-out forwards';
+		// backgroundDiv.style.animation = 'showAlertBox 0.5s ease-in-out forwards';
 		alertBoxDiv.style.animation = 'hideAlertBox 0.5s ease-in-out forwards';
 		setTimeout(() => {
 			alertBoxDiv.classList = '';
