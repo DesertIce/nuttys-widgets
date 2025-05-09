@@ -1191,6 +1191,14 @@ function GetWinnersList(gifts) {
 }
 
 function UpdateAlertBox(platform, avatarURL, headerText, descriptionText, attributeText, username, message, sbAction, sbData) {
+	// If the page is inactive (e.g. the alert browser source is on an inactive OBS scene)
+	// don't run the alert
+	if (document.visibilityState != 'visible')
+	{
+		console.debug('Tab is inactive. Skipping alert...');
+		return;
+	}
+
 	// Check if the widget is in the middle of an animation
 	// If any alerts are requested while the animation is playing, it should be added to the alert queue
 	if (widgetLocked) {
@@ -1267,7 +1275,13 @@ function UpdateAlertBox(platform, avatarURL, headerText, descriptionText, attrib
 		alertBox.style.transition = 'all 0.5s ease-in-out';
 		theContentThatShowsFirstInsteadOfSecond.style.opacity = 0;
 		
-		if (message && showMesesages) {
+		// For safety, if message doesn't exist, set it to empty string anyway
+		if (!message)
+			message = '';
+
+		// If there is a message, show it in the second part of the animation
+		// Else, just close the alert box and run the next alert
+		if (message.trim().length > 0 && showMesesages) {
 		
 			//theContentThatShowsLastInsteadOfFirst.style.display = 'inline-block';
 			theContentThatShowsLastInsteadOfFirst.style.visibility = 'visible';
@@ -1311,7 +1325,8 @@ function UpdateAlertBox(platform, avatarURL, headerText, descriptionText, attrib
 				
 				theContentThatShowsFirstInsteadOfSecond.style.opacity = 1;
 				theContentThatShowsLastInsteadOfFirst.style.opacity = 0;
-				theContentThatShowsLastInsteadOfFirst.style.display = 'none';
+				//theContentThatShowsLastInsteadOfFirst.style.display = 'none';
+				theContentThatShowsLastInsteadOfFirst.style.visibility = 'hidden';
 				widgetLocked = false;
 				if (alertQueue.length > 0) {
 					console.debug("Pulling next alert from the queue");
