@@ -272,6 +272,11 @@ client.on('Fourthwall.GiftDrawEnded', (response) => {
 	FourthwallGiftDrawEnded(response.data);
 })
 
+client.on('General.Custom', (response) => {
+	console.debug(response.data);
+	GeneralCustom(response.data);
+})
+
 
 
 ///////////////////////
@@ -355,7 +360,10 @@ async function TwitchChatMessage(data) {
 
 	// Set the username info
 	if (showUsername) {
-		usernameDiv.innerText = data.message.displayName;
+		if (data.message.displayName.toLowerCase() == data.message.username.toLowerCase())
+			usernameDiv.innerText = data.message.displayName;
+		else
+			usernameDiv.innerText = `${data.message.displayName} (${data.message.username})`;
 		usernameDiv.style.color = data.message.color;
 	}
 
@@ -420,7 +428,7 @@ async function TwitchChatMessage(data) {
 		}
 		else {
 			// For non-word emotes, ensure they are surrounded by non-word characters or boundaries
-			regexPattern = `(?:^|[^\\w])${emoteName}(?:$|[^\\w])`;
+			regexPattern = `(?<=^|[^\\w])${emoteName}(?=$|[^\\w])`;
 		}
 
 		const regex = new RegExp(regexPattern, 'g');
@@ -572,7 +580,10 @@ async function TwitchAnnouncement(data) {
 		content.querySelector("#timestamp").classList.add("timestamp");
 		content.querySelector("#timestamp").innerText = GetCurrentTimeFormatted();
 	}
-	content.querySelector("#username").innerText = data.user.name;
+	if (data.user.name.toLowerCase() == data.user.login.toLowerCase())
+		content.querySelector("#username").innerText = data.user.name;
+	else
+		content.querySelector("#username").innerText = `${data.user.name} (${data.user.login})`;
 	content.querySelector("#username").style.color = data.user.color;
 	content.querySelector("#message").innerText = data.text;
 
@@ -613,7 +624,7 @@ async function TwitchAnnouncement(data) {
 			}
 			else {
 				// For non-word emotes, ensure they are surrounded by non-word characters or boundaries
-				regexPattern = `(?:^|[^\\w])${emoteName}(?:$|[^\\w])`;
+				regexPattern = `(?<=^|[^\\w])${emoteName}(?=$|[^\\w])`;
 			}
 	
 			const regex = new RegExp(regexPattern, 'g');
@@ -659,7 +670,9 @@ async function TwitchSub(data) {
 	}
 
 	// Set the text
-	const username = data.user.name;
+	let username = data.user.name;
+	if (data.user.name.toLowerCase() != data.user.login.toLowerCase())
+		username = `${data.user.name} (${data.user.login})`;
 	const subTier = data.sub_tier;
 	const isPrime = data.is_prime;
 
@@ -703,7 +716,9 @@ async function TwitchResub(data) {
 	}
 
 	// Set the text
-	const username = data.user.name;
+	let username = data.user.name;
+	if (data.user.name.toLowerCase() != data.user.login.toLowerCase())
+		username = `${data.user.name} (${data.user.login})`;
 	const subTier = data.subTier;
 	const isPrime = data.isPrime;
 	const cumulativeMonths = data.cumulativeMonths;
@@ -750,7 +765,9 @@ async function TwitchGiftSub(data) {
 	}
 
 	// Set the text
-	const username = data.user.name;
+	let username = data.user.name;
+	if (data.user.name.toLowerCase() != data.user.login.toLowerCase())
+		username = `${data.user.name} (${data.user.login})`;
 	const subTier = data.subTier;
 	const recipient = data.recipient.name;
 	const cumlativeTotal = data.cumlativeTotal;
@@ -794,7 +811,9 @@ async function TwitchRewardRedemption(data) {
 	}
 
 	// Set the text
-	const username = data.user_name;
+	let username = data.user_name;
+	if (data.user_name.toLowerCase() != data.user_login.toLowerCase())
+		username = `${data.user_name} (${data.user_login})`;
 	const rewardName = data.reward.title;
 	const cost = data.reward.cost;
 	const userInput = data.user_input;
@@ -839,7 +858,9 @@ async function TwitchRaid(data) {
 
 
 	// Set the text
-	const username = data.from_broadcaster_user_login;
+	let username = data.from_broadcaster_user_name;
+	if (data.from_broadcaster_user_name.toLowerCase() != data.from_broadcaster_user_login.toLowerCase())
+		username = `${data.from_broadcaster_user_name} (${data.from_broadcaster_user_login})`;
 	const viewers = data.viewers;
 
 	titleDiv.innerText = `${username} is raiding`;
@@ -1074,7 +1095,8 @@ function YouTubeSuperChat(data) {
 
 	// Set message text
 	titleDiv.innerText = `🪙 ${data.user.name} sent a Super Chat (${data.amount})`;
-	contentDiv.innerText = `${data.message}!`;
+	if (data.message)
+		contentDiv.innerText = `${data.message}!`;
 
 	AddMessageItem(instance, data.eventId);
 }
@@ -2073,4 +2095,149 @@ function SetConnectionStatus(connected) {
 		statusContainer.style.transition = "";
 		statusContainer.style.opacity = 1;
 	}
+}
+
+
+
+
+
+
+
+function GeneralCustom(data) {
+	const target = data.target;
+	const type = data.type;
+
+	// Check the target for the message
+	const path = window.location.pathname;
+	const firstSegment = path.split('/')[1];
+	if (firstSegment != target)
+	    return;
+
+	switch (type)
+	{
+		case "message":
+			CustomMessage(data);
+			break;
+		case "alert":
+			CustomAlert(data);
+			break;
+	}
+}
+
+function CustomMessage(data) {
+	// Don't post messages starting with "!"
+	if (data.message.startsWith("!") && excludeCommands)
+		return;
+
+	// Don't post messages from users from the ignore list
+	if (ignoreUserList.includes(data.username.toLowerCase()))
+		return;
+
+	// Get a reference to the template
+	const template = document.getElementById('messageTemplate');
+
+	// Create a new instance of the template
+	const instance = template.content.cloneNode(true);
+
+	// Get divs
+	const messageContainerDiv = instance.querySelector("#messageContainer");
+	const firstMessageDiv = instance.querySelector("#firstMessage");
+	const sharedChatDiv = instance.querySelector("#sharedChat");
+	const sharedChatChannelDiv = instance.querySelector("#sharedChatChannel");
+	const replyDiv = instance.querySelector("#reply");
+	const replyUserDiv = instance.querySelector("#replyUser");
+	const replyMsgDiv = instance.querySelector("#replyMsg");
+	const userInfoDiv = instance.querySelector("#userInfo");
+	const avatarDiv = instance.querySelector("#avatar");
+	const timestampDiv = instance.querySelector("#timestamp");
+	const platformDiv = instance.querySelector("#platform");
+	const badgeListDiv = instance.querySelector("#badgeList");
+	const pronounsDiv = instance.querySelector("#pronouns");
+	const usernameDiv = instance.querySelector("#username");
+	const messageDiv = instance.querySelector("#message");
+
+	// Set timestamp
+	if (showTimestamps) {
+		timestampDiv.classList.add("timestamp");
+		timestampDiv.innerText = GetCurrentTimeFormatted();
+	}
+
+	// Set the username info
+	if (showUsername) {
+		if (data.displayName.toLowerCase() == data.username.toLowerCase())
+			usernameDiv.innerText = data.displayName;
+		else
+			usernameDiv.innerText = `${data.displayName} (${data.username})`;
+		usernameDiv.style.color = data.userColor;
+	}
+
+	// Set the message data
+	let message = data.message;
+
+	// Set furry mode
+	if (furryMode)
+		message = TranslateToFurry(message);
+
+	// Set message text
+	if (showMessage) {
+		messageDiv.innerText = message;
+	}
+
+	// Remove the line break
+	if (inlineChat) {
+		instance.querySelector("#colon-separator").style.display = `inline`;
+		instance.querySelector("#line-space").style.display = `none`;
+	}
+
+	// Render platform
+	if (showPlatform) {
+		const platformElements = `<img src="${data.platform.icon}" class="platform"/>`;
+		platformDiv.innerHTML = platformElements;
+	}
+
+	// Render avatars
+	if (showAvatar) {
+		const avatar = new Image();
+		avatar.src = data.avatar;
+		avatar.classList.add("avatar");
+		avatarDiv.appendChild(avatar);
+	}
+
+	AddMessageItem(instance, data.msgId, data.platform.name, data.username);
+}
+
+function CustomAlert(data) {
+	// Get a reference to the template
+	const template = document.getElementById('cardTemplate');
+
+	// Create a new instance of the template
+	const instance = template.content.cloneNode(true);
+
+	// Get divs
+	const cardDiv = instance.querySelector("#card");
+	const headerDiv = instance.querySelector("#header");
+	const avatarDiv = instance.querySelector("#avatar");
+	const iconDiv = instance.querySelector("#icon");
+	const titleDiv = instance.querySelector("#title");
+	const contentDiv = instance.querySelector("#content");
+
+	// Set the card background colors
+	cardDiv.style.background = data.background;
+
+	// Set the card header
+	const icon = new Image();
+	icon.src = data.icon;
+	icon.classList.add("badge");
+	iconDiv.appendChild(icon);
+
+	// // Set the text
+	// let username = data.displayName;
+	// if (data.displayName.toLowerCase() != data.username.toLowerCase())
+	// 	username = `${data.displayName} (${data.username})`;
+
+	titleDiv.innerText = data.title;
+	contentDiv.innerText = data.content;
+
+	AddMessageItem(instance, data.messageId);
+
 }
